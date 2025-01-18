@@ -1,15 +1,5 @@
 [
   {
-    "id": "7e4acd7c-873e-49f1-b522-a83fa42542d4",
-    "text": "hello!",
-    "date": "2025-01-18T06:45:52.465Z"
-  },
-  {
-    "id": "c42ddd4a-0e7a-4d83-9c57-531b32a9ad14",
-    "text": "blah",
-    "date": "2025-01-17T23:41:23.302Z"
-  },
-  {
     "id": "4bd5b977-2745-4c76-8b73-81afa73056fe",
     "text": "#Blender script to Set all selected objects to smooth\nimport bpy\n\ndef enable_auto_smooth_for_selected():\n    # Get all selected objects\n    selected_objs = bpy.context.selected_objects\n    \n    # Loop through selected objects\n    for obj in selected_objs:\n        # Ensure the object is a mesh\n        if obj.type == 'MESH':\n            # Enable auto smooth\n            obj.data.use_auto_smooth = True\n            # (Optional) You can set a custom angle here if needed\n            # obj.data.auto_smooth_angle = 1.22173  # ~70 degrees, for example\n\n# Run the function\nenable_auto_smooth_for_selected()",
     "date": "2025-01-17T06:48:29.671Z"

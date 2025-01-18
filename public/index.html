@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>PASTA</title>
+	<title>🍝 PASTA</title>
 	<link rel="stylesheet" href="stylesheet.css" type="text/css" charset="utf-8"/>
 </head>
 <body>
@@ -35,12 +35,6 @@
 	</div>
 
 	<script>
-		// Generate a random number between 1 and 3
-		const randomNumber = Math.floor(Math.random() * 3) + 1;
-
-		// Set the background image using the random number
-		document.body.style.backgroundImage = `url('pasta${randomNumber}.jpg')`;
-
 		const App = {}; // Namespace to hold global functions
 	
 		document.addEventListener('DOMContentLoaded', () => {
@@ -133,6 +127,16 @@
 			});
 	
 			saveButton.addEventListener('click', saveText);
+
+			document.addEventListener('keydown', function(event) {
+				if (event.ctrlKey && event.key === 'Enter') {
+					saveText();
+				}
+
+				if (event.key === 'Escape') {
+					modal.style.display = 'none';
+				}
+			});
 	
 			textInput.focus();
 			loadEntries( ()=> {
