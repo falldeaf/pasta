@@ -1,9 +1,21 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const fs = require('fs');
-const { v4: uuidv4 } = require('uuid'); // Unique ID generator
-const path = require('path');
-const { default: PQueue } = require('p-queue');
+//const express = require('express');
+//const bodyParser = require('body-parser');
+//const fs = require('fs');
+//const { v4: uuidv4 } = require('uuid'); // Unique ID generator
+//const path = require('path');
+//const { default: PQueue } = require('p-queue');
+
+import express from 'express';
+import bodyParser from 'body-parser';
+import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
+import path from 'path';
+import PQueue from 'p-queue';
+
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 const PORT = 3000;
