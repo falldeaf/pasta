@@ -14,7 +14,7 @@
 
 		<div class="input-section">
 			<textarea id="textInput" placeholder="Paste your text here..."></textarea>
-			<button id="saveButton">Save</button>
+			<button id="saveButton">Save (ctrl+enter)</button>
 		</div>
 		<div class="entries-section">
 			<ul id="entryList"></ul>
@@ -57,7 +57,6 @@
 			async function loadEntries(callback = null) {
 				const response = await fetch('/api/entries');
 				const entries = await response.json();
-				console.log(entries);
 				entryList.innerHTML = entries.map((entry, index) => `
 					<li data-uid="${entry.id}">
 						<span><span class="date">${new Date(entry.date).toLocaleDateString()}</span> - ${escapeHtml(entry.text.slice(0, 65))}...</span>

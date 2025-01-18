@@ -76,6 +76,11 @@ textarea {
 	color: #e0e0e0;
 }
 
+textarea:focus {
+    outline: 2px solid #f777c6; /* Gold border */
+    border-radius: 4px; /* Optional rounded corners */
+}
+
 button {
 	padding: 10px;
 	font-size: 1rem;
