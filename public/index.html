@@ -35,6 +35,12 @@
 	</div>
 
 	<script>
+		// Generate a random number between 1 and 3
+		const randomNumber = Math.floor(Math.random() * 3) + 1;
+
+		// Set the background image using the random number
+		document.body.style.backgroundImage = `url('pasta${randomNumber}.jpg')`;
+
 		const App = {}; // Namespace to hold global functions
 	
 		document.addEventListener('DOMContentLoaded', () => {
@@ -54,7 +60,7 @@
 				return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 			}
 	
-			async function loadEntries() {
+			async function loadEntries(callback = null) {
 				const response = await fetch('/api/entries');
 				const entries = await response.json();
 				console.log(entries);
@@ -93,7 +99,10 @@
 						modal.style.display = 'flex';
 					});
 				});
+
+				if(callback != null) callback();
 			}
+			window.loadEntries = loadEntries;
 	
 			// Define global functions inside the App namespace
 			App.copyText = (text) => {
@@ -106,32 +115,7 @@
 				await fetch(`/api/entries/${id}`, { method: 'DELETE' });
 				loadEntries();
 			};
-	
-			function showToast(message, status, duration = 3000) {
-				const container = document.getElementById('toast-container');
-				const toast = document.createElement('div');
-				toast.className = `toast ${status}`;
-				toast.innerHTML = `
-					<span>${message}</span>
-					<button onclick="this.parentElement.remove()">×</button>
-					<div class="progress-bar"></div>
-				`;
-				container.appendChild(toast);
-				const progressBar = toast.querySelector('.progress-bar');
-				progressBar.style.width = '100%';
-				setTimeout(() => {
-					progressBar.style.transition = `width ${duration}ms linear`;
-					progressBar.style.width = '0%';
-				}, 10);
-				const timeout = setTimeout(() => {
-					toast.remove();
-				}, duration);
-				toast.querySelector('button').onclick = () => {
-					clearTimeout(timeout);
-					toast.remove();
-				};
-			}
-	
+
 			deleteModal.addEventListener('click', async () => {
 				if (currentEntryId) {
 					await App.deleteEntry(currentEntryId);
@@ -147,59 +131,93 @@
 			closeModal.addEventListener('click', () => {
 				modal.style.display = 'none';
 			});
-
-			// Optional: a helper to highlight the <li> with a matching data-id
-			function highlightEntryById(id) {
-				// Find the button or element with data-id in the list
-				console.log(id);
-				const liToHighlight = document.querySelector(`li[data-uid="${id}"]`);
-				if (liToHighlight) {
-					// Add the 'highlight' class
-					liToHighlight.classList.add('highlight');
-
-					// Scroll to the element if it's not in view
-					liToHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-					// Remove the 'highlight' class after 4 seconds
-					setTimeout(() => {
-						liToHighlight.classList.remove('highlight');
-					}, 4000);
-				}
-			}
 	
-			saveButton.addEventListener('click', async () => {
-				const text = textInput.value.trim();
-				if (!text) return;
-
-				console.log("Saving...");
-
-				const result = await fetch('/api/entries', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ text }),
-				});
-
-				const responseData = await result.json();
-
-				// If success == false => possible duplicate (or some other error)
-				if (!responseData.success) {
-					if (responseData.reason === 'Duplicate entry') {
-						showToast("That text already exists.", 'error');
-						highlightEntryById(responseData.existingId);
-					} else {
-						showToast("Could not save entry!", 'error');
-					}
-				} else {
-					// Successfully added
-					showToast("Entry saved successfully!", 'success');
-					textInput.value = '';
-					loadEntries();  // refresh the list
-				}
-			});
+			saveButton.addEventListener('click', saveText);
 	
 			textInput.focus();
-			loadEntries();
+			loadEntries( ()=> {
+				const urlParams = new URLSearchParams(window.location.search);
+				if (urlParams.has('text')) {
+					textInput.value = urlParams.get('text');
+					saveText();
+				}
+			});
 		});
+
+		async function saveText() {
+			const text = textInput.value.trim();
+			if (!text) return;
+
+			console.log("Saving...");
+
+			const result = await fetch('/api/entries', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ text }),
+			});
+
+			const responseData = await result.json();
+
+			// If success == false => possible duplicate (or some other error)
+			if (!responseData.success) {
+				if (responseData.reason === 'Duplicate entry') {
+					showToast("That text already exists.", 'error');
+					highlightEntryById(responseData.existingId);
+				} else {
+					showToast("Could not save entry!", 'error');
+				}
+			} else {
+				// Successfully added
+				loadEntries( ()=> {
+					showToast("Entry saved successfully!", 'success');
+					textInput.value = '';
+				});  // refresh the list
+			}
+		}
+
+		// Optional: a helper to highlight the <li> with a matching data-id
+		function highlightEntryById(id) {
+			// Find the button or element with data-id in the list
+			console.log(id);
+			const liToHighlight = document.querySelector(`li[data-uid="${id}"]`);
+			if (liToHighlight) {
+				// Add the 'highlight' class
+				liToHighlight.classList.add('highlight');
+
+				// Scroll to the element if it's not in view
+				liToHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+				// Remove the 'highlight' class after 4 seconds
+				setTimeout(() => {
+					liToHighlight.classList.remove('highlight');
+				}, 4000);
+			}
+		}
+
+		function showToast(message, status, duration = 3000) {
+			const container = document.getElementById('toast-container');
+			const toast = document.createElement('div');
+			toast.className = `toast ${status}`;
+			toast.innerHTML = `
+				<span>${message}</span>
+				<button onclick="this.parentElement.remove()">×</button>
+				<div class="progress-bar"></div>
+			`;
+			container.appendChild(toast);
+			const progressBar = toast.querySelector('.progress-bar');
+			progressBar.style.width = '100%';
+			setTimeout(() => {
+				progressBar.style.transition = `width ${duration}ms linear`;
+				progressBar.style.width = '0%';
+			}, 10);
+			const timeout = setTimeout(() => {
+				toast.remove();
+			}, duration);
+			toast.querySelector('button').onclick = () => {
+				clearTimeout(timeout);
+				toast.remove();
+			};
+		}
 	</script>
 	
 </body>
