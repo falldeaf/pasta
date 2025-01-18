@@ -72,7 +72,7 @@
 				document.querySelectorAll('.copyButton').forEach(button => {
 					button.addEventListener('click', (event) => {
 						const text = event.currentTarget.dataset.text;
-						App.copyText(text);
+						copyText(text);
 					});
 				});
 	
@@ -99,11 +99,11 @@
 			window.loadEntries = loadEntries;
 	
 			// Define global functions inside the App namespace
-			App.copyText = (text) => {
-				navigator.clipboard.writeText(text)
-					.then(() => showToast("Copied!", 'success'))
-					.catch(err => showToast("Failed to copy!", 'error'));
-			};
+			//App.copyText = (text) => {
+			//	navigator.clipboard.writeText(text)
+			//		.then(() => showToast("Copied!", 'success'))
+			//		.catch(err => showToast("Failed to copy!", 'error'));
+			//};
 	
 			App.deleteEntry = async (id) => {
 				await fetch(`/api/entries/${id}`, { method: 'DELETE' });
@@ -119,7 +119,7 @@
 	
 			copyModal.addEventListener('click', () => {
 				const text = Array.from(modalText.querySelectorAll('.line-text')).map(line => line.textContent).join('\n');
-				App.copyText(text);
+				copyText(text);
 			});
 	
 			closeModal.addEventListener('click', () => {
@@ -176,6 +176,29 @@
 					showToast("Entry saved successfully!", 'success');
 					textInput.value = '';
 				});  // refresh the list
+			}
+		}
+
+		function copyText(text) {
+			if (navigator.clipboard) {
+				navigator.clipboard.writeText(text).then(() => {
+					showToast("Copied!", 'success');
+				}).catch(err => {
+					showToast("Couldn't copy", 'failure');
+				});
+			} else {
+				// Fallback method for non-HTTPS or older browsers
+				const textarea = document.createElement('textarea');
+				textarea.value = text;
+				document.body.appendChild(textarea);
+				textarea.select();
+				try {
+					document.execCommand('copy');
+					showToast("Copied!", 'success');
+				} catch (err) {
+					showToast("Couldn't copy", 'failure');
+				}
+				document.body.removeChild(textarea);
 			}
 		}
 
